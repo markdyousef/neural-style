@@ -5,11 +5,19 @@ from keras.utils.data_utils import get_file
 from keras.applications.imagenet_utils import decode_predictions, preprocess_input, _obtain_input_shape
 from keras import backend as K
 from keras.engine import get_source_inputs
+import numpy as np
 
 WEIGHTS_PATH = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_tf_dim_ordering_tf_kernels.h5'
 WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5'
 
-def VGG16(include_top=True, weights='imagenet', input_tensor=None, input_shape=None, pooling=None, int_pooling='max', classes=1000):
+rn_mean = np.array([123.68, 116.779, 103.030], dtype=np.float32)
+# subtract the mean provided by VGG authers and reverse RGB->BGR
+def preprocess(x): return (x - rn_mean)[:, :, :, ::-1]
+# add the mean back and reverse BGR->RGB
+def deprocess(x, shape): return np.clip(x.reshape(shape)[:, :, :, ::-1] + rn_mean, 0, 255)
+
+def VGG16(include_top=True, weights='imagenet', input_tensor=None,
+          input_shape=None, pooling=None, int_pooling='max', classes=1000):
     if weights not in {'imagenet', None}:
         raise ValueError('The "weigths" argument should be either "None" or "imagenet"')
     
