@@ -14,6 +14,12 @@ from scipy import ndimage
 from keras_tqdm import TQDMNotebookCallback
 import bcolz as bz
 
+def limit_memory():
+    K.get_session().close()
+    cfg = K.tf.ConfigProto()
+    cfg.gpu_options.allow_growth = True
+    K.set_session(K.tf.Session(config=cfg))
+
 def save_array(fname, arr):
     c = bz.carray(arr, rootdir=fname, mode=w)
     c.flush()
